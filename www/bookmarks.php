@@ -24,6 +24,7 @@ require_once 'www-header.php';
 /* Service creation: only useful services are created */
 $bookmarkservice =SemanticScuttle_Service_Factory::get('Bookmark');
 $cacheservice =SemanticScuttle_Service_Factory::get('Cache');
+$tagextractorservice =SemanticScuttle_Service_Factory::get('TagExtractor');
 
 /* Managing all possible inputs */
 isset($_GET['action']) ? define('GET_ACTION', $_GET['action']): define('GET_ACTION', '');
@@ -172,7 +173,7 @@ if ($userservice->isLoggedOn() && POST_SUBMITTED != '') {
 
 if (GET_ACTION == "add") {
 	// If the bookmark exists already, edit the original
-	if ($bookmarkservice->bookmarkExists(stripslashes(GET_ADDRESS), $currentUserID)) {		
+	if ($bookmarkservice->bookmarkExists(stripslashes(GET_ADDRESS), $currentUserID)) {
 		$bookmark = $bookmarkservice->getBookmarks(0, NULL, $currentUserID, NULL, NULL, NULL, NULL, NULL, NULL, $bookmarkservice->getHash(stripslashes(GET_ADDRESS)));
 		$popup = (GET_POPUP!='') ? '?popup=1' : '';
 		header('Location: '. createURL('edit', $bookmark['bookmarks'][0]['bId'] . $popup));
@@ -195,9 +196,9 @@ if ($templatename == 'editbookmark.tpl') {
 			);
 			$tplVars['tags'] = $_POST['tags'];
 		} else {
-			if(GET_COPYOF != '') {  //copy from bookmarks page
+			if (GET_COPYOF != '') {  //copy from bookmarks page
 				$tplVars['row'] = $bookmarkservice->getBookmark(intval(GET_COPYOF), true);
-				if(!$currentUser->isAdmin()) {
+				if (!$currentUser->isAdmin()) {
 					$tplVars['row']['bPrivateNote'] = ''; //only admin can copy private note
 				}
 			}else {  //copy from pop-up bookmarklet
@@ -206,11 +207,11 @@ if ($templatename == 'editbookmark.tpl') {
                 'bAddress' => stripslashes(GET_ADDRESS),
                 'bDescription' => stripslashes(GET_DESCRIPTION),
                 'bPrivateNote' => stripslashes(GET_PRIVATENOTE),
-                'tags' => (GET_TAGS ? explode(',', stripslashes(GET_TAGS)) : array()),
-                'bStatus' => $GLOBALS['defaults']['privacy'] 
+                'tags' => (GET_TAGS ? explode(',', stripslashes(GET_TAGS)) : $tagextractorservice->extractFromUrl(stripslashes(GET_ADDRESS))),
+                'bStatus' => $GLOBALS['defaults']['privacy']
 			 );
 			}
-				
+
 		}
 		$title = T_('Add a Bookmark');
 		$tplVars['referrer'] = '';;
