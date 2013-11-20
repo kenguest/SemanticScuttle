@@ -34,7 +34,7 @@ class SemanticScuttle_Service_TagExtractor
         } elseif (stripos($url, "magento") !== false) {
             $tags[] = "magento";
         }
-        return $tags;
+        return array_unique($tags);
     }
 
 }
