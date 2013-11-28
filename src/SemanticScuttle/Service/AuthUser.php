@@ -53,7 +53,7 @@ class SemanticScuttle_Service_AuthUser extends SemanticScuttle_Service_User
     * @link http://pear.php.net/manual/en/package.authentication.auth.intro-storage.php
     */
     var $authtype = null;
-    
+
     /**
     * Authentication options
     *
@@ -86,7 +86,7 @@ class SemanticScuttle_Service_AuthUser extends SemanticScuttle_Service_User
     /**
      * Create new instance
      *
-     * @var sql_db $db Database object
+     * @param sql_db $db Database object
      */
     protected function __construct($db)
     {
@@ -100,11 +100,11 @@ class SemanticScuttle_Service_AuthUser extends SemanticScuttle_Service_User
         if (!$this->authtype) {
             return;
         }
-        require_once 'Auth.php';
+        include_once 'Auth.php';
         $this->auth = new Auth($this->authtype, $this->authoptions);
         //FIXME: check if it worked (i.e. db connection)
         if ($this->authdebug) {
-            require_once 'Log.php';
+            include_once 'Log.php';
             $this->auth->logger = Log::singleton(
                 'display', '', '', array(), PEAR_LOG_DEBUG
             );
@@ -208,7 +208,7 @@ class SemanticScuttle_Service_AuthUser extends SemanticScuttle_Service_User
         }
 
         return true;
-     }
+    }
 
 
 
