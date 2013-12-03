@@ -152,32 +152,39 @@ class SemanticScuttle_Service_TagExtractor
             $tags[] = "magento";
         }
 
-        $metaTags = get_meta_tags($url);
-        $extractor = $this->_getExtractor($metaTags);
-        if (!empty($metaTags)) {
-            if (isset($metaTags['keywords'])) {
-                $w = explode(",", $metaTags['keywords']);
-                var_dump ($w);
-                $tags = array_merge($w, $tags);
+        $mUrl = $url;
+        if ($parsed['scheme'] === 'file') {
+            $mUrl = $parsed['path'];
+        }
+        $metaTags = get_meta_tags($mUrl);
+        $extractor = null;
+        if ($metaTags !== false) {
+            var_dump (compact('metaTags'));
+            $extractor = $this->_getExtractor($metaTags);
+            if (!empty($metaTags)) {
+                if (isset($metaTags['keywords'])) {
+                    $w = explode(",", $metaTags['keywords']);
+                    var_dump ($w);
+                    $tags = array_merge($w, $tags);
+                }
+                if (isset($metaTags['description'])) {
+                    var_dump($metaTags['description']);
+                }
             }
-            if (isset($metaTags['description'])) {
-                var_dump($metaTags['description']);
-            }
+        } else {
+            $extractor = $this->_getExtractor('');
         }
         // Check generator referenced in the source, e.g. if mediawiki then
         // be aware of how it links to used categories, determine what they
         // are and suggest them as tags.
-        var_dump($url);
-        $content = null;
-        $mf2Parsed = null;
 
-        if ($parsed['scheme'] !== 'https') {
-            try {
-                $content = $this->_getContent($url);
-            } catch(Exception $ex) {
-                $content = null;
-            }
+        try {
+            echo __FILE__ . ":" . __LINE__ . "<br/>\n";
+            $content = $this->_getContent($mUrl);
+        } catch(Exception $ex) {
+            $content = null;
         }
+        var_dump(compact('url'));
 
         if ($content !== null) {
             include "php-mf2/Mf2/Parser.php";
