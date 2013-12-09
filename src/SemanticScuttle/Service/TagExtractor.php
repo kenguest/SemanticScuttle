@@ -79,8 +79,9 @@ class SemanticScuttle_Service_TagExtractor
         if (!empty ($metaTags)) {
             if (isset($metaTags['generator'])) {
                 if (stripos($metaTags['generator'], 'MediaWiki') !== false) {
-                    // use mediawiki extractor ? :)
                     $class = "TagExtractor_MediaWiki";
+                } elseif (stripos($metaTags['generator'], 'WordPress') !== false) {
+                    $class = "TagExtractor_WordPress";
                 } else {
                     var_dump($metaTags['generator']);
                 }
@@ -90,6 +91,7 @@ class SemanticScuttle_Service_TagExtractor
         ini_set('display_errors', 1);
         error_reporting(E_ALL);
         $file = str_replace('_', '/', $class) . '.php';
+        include_once "SemanticScuttle/Service/TagExtractor/Basic.php";
         include_once $file;
         echo "Extractor: $class<br/>\n";
         return new $class();
@@ -120,77 +122,30 @@ class SemanticScuttle_Service_TagExtractor
      */
     public function extractFromUrl($url)
     {
-        // will obviously need something better than this.
-        // It's a start though!
         $tags = array();
         $parsed = parse_url($url);
-        var_dump ($parsed);
-        // stackexchange sites...
-        if (stripos($parsed['host'], 'stackexchange.com') !== false) {
-            $tags[] = str_replace('.stackexchange.com', '', $parsed['host']);
-        }
-
-        $hostArray = explode('.', $parsed['host']);
-        $sub = strtolower($hostArray[0]);
-        if (($sub == 'help') || ($sub == 'hilfe')) {
-            $tags[] = $hostArray[1];
-        }
-
-        if (strpos($parsed['path'], "/questions/tagged/") === 0) {
-            $tags[] = str_replace('+', ', ', substr($parsed['path'], 18));
-        }
-        if (strpos($parsed['path'], "/unanswered/tagged/") === 0) {
-            $tags[] = str_replace('+', ', ', substr($parsed['path'], 19));
-        }
-
-        // common/favourite keywords.
-        if (stripos($url, "ubuntu") !== false) {
-            $tags[] = "ubuntu";
-        } elseif (stripos($url, "voip") !== false) {
-            $tags[] = "voip";
-        } elseif (stripos($url, "magento") !== false) {
-            $tags[] = "magento";
-        }
-
         $mUrl = $url;
         if ($parsed['scheme'] === 'file') {
             $mUrl = $parsed['path'];
         }
         $metaTags = get_meta_tags($mUrl);
+
         $extractor = null;
         if ($metaTags !== false) {
-            var_dump (compact('metaTags'));
             $extractor = $this->_getExtractor($metaTags);
-            if (!empty($metaTags)) {
-                if (isset($metaTags['keywords'])) {
-                    $w = explode(",", $metaTags['keywords']);
-                    var_dump ($w);
-                    $tags = array_merge($w, $tags);
-                }
-                if (isset($metaTags['description'])) {
-                    var_dump($metaTags['description']);
-                }
-            }
         } else {
             $extractor = $this->_getExtractor('');
         }
-        // Check generator referenced in the source, e.g. if mediawiki then
-        // be aware of how it links to used categories, determine what they
-        // are and suggest them as tags.
 
         try {
-            echo __FILE__ . ":" . __LINE__ . "<br/>\n";
             $content = $this->_getContent($mUrl);
         } catch(Exception $ex) {
             $content = null;
         }
-        var_dump(compact('url'));
 
-        if ($content !== null) {
-            include "php-mf2/Mf2/Parser.php";
-            $mf2Parsed = Mf2\parse($content, $url);
-            var_dump($mf2Parsed);
-        }
+        $extractor->setUrl($mUrl)->setContent($content)->setMetaTags($metaTags);
+        $extracted = $extractor->getTags();
+        $tags = array_merge($extracted, $tags);
 
         // Also check <meta name='keywords' content='foo,bar,qux'>
         // <a href="foo" rel="tag">category</a>
