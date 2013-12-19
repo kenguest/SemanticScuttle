@@ -202,12 +202,18 @@ if ($templatename == 'editbookmark.tpl') {
 					$tplVars['row']['bPrivateNote'] = ''; //only admin can copy private note
 				}
 			}else {  //copy from pop-up bookmarklet
+             $extractedTags = '';
+             if ($GLOBALS['tagExtraction']) {
+                $extractedTags = $tagextractorservice->extractFromUrl(
+                    stripslashes(GET_ADDRESS)
+                );
+             }
 			 $tplVars['row'] = array(
 			 	'bTitle' => stripslashes(GET_TITLE),
                 'bAddress' => stripslashes(GET_ADDRESS),
                 'bDescription' => stripslashes(GET_DESCRIPTION),
                 'bPrivateNote' => stripslashes(GET_PRIVATENOTE),
-                'tags' => (GET_TAGS ? explode(',', stripslashes(GET_TAGS)) : $tagextractorservice->extractFromUrl(stripslashes(GET_ADDRESS))),
+                'tags' => (GET_TAGS ? explode(',', stripslashes(GET_TAGS)) : $extractedTags),
                 'bStatus' => $GLOBALS['defaults']['privacy']
 			 );
 			}

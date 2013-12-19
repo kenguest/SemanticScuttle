@@ -5,7 +5,7 @@ class SemanticScuttle_Service_TagExtractor_Basic
     protected $metaTags = null;
     protected $url = null;
 
-    public function setContent($content) 
+    public function setContent($content)
     {
         $this->content = $content;
         return $this;
@@ -68,21 +68,16 @@ class SemanticScuttle_Service_TagExtractor_Basic
                 $w = explode(",", $metaTags['keywords']);
                 $tags = array_merge($w, $tags);
             }
-            if (isset($metaTags['description'])) {
-                var_dump($metaTags['description']);
-            }
         }
         if ($content !== null) {
-            include "php-mf2/Mf2/Parser.php";
+            include 'php-mf2/Mf2/Parser.php';
             $mf2Parsed = Mf2\parse($content, $url);
-            var_dump ($mf2Parsed);
             $rels = $mf2Parsed['rels'];
             if (is_array($rels) && isset($rels['tag'])) {
                 foreach($rels['tag'] as $tag) {
                     $tag = trim($tag, '/');
-                    $temp = explode("/", $tag);
-                    $tag = array_pop($temp);
-                    $tags[] = $tag;
+                    $temp = explode('/', $tag);
+                    $tags[] = urldecode(array_pop($temp));
                 }
             }
         }

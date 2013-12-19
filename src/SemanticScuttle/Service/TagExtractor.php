@@ -93,7 +93,6 @@ class SemanticScuttle_Service_TagExtractor
         $file = str_replace('_', '/', $class) . '.php';
         include_once "SemanticScuttle/Service/TagExtractor/Basic.php";
         include_once $file;
-        echo "Extractor: $class<br/>\n";
         return new $class();
     }
 
@@ -167,6 +166,4 @@ class SemanticScuttle_Service_TagExtractor
     }
 
 }
-
-
 ?>
