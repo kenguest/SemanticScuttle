@@ -29,17 +29,18 @@ require_once 'www-header.php';
  * @param array  $array   Typically $_GET or $_POST.
  * @param string $key     Associated key.
  * @param mixed  $default Default value, optional. Defaults to empty string.
+ * @param bool   $case    Whether to define constant as case-insensitive.
  *
  * @access public
  *
  * @return void
  */
-function defineWithDefault($name, $array, $key, $default = '')
+function defineWithDefault($name, $array, $key, $default = '', $case = false)
 {
     if (isset($array[$key])) {
-        define($name, $array[$key]);
+        return define($name, $array[$key], (bool) $case);
     } else {
-        define($name, $default);
+        return define($name, $default, (bool) $case);
     }
 }
 
