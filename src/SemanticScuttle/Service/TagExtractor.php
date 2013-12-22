@@ -82,8 +82,6 @@ class SemanticScuttle_Service_TagExtractor
                     $class = "TagExtractor_MediaWiki";
                 } elseif (stripos($metaTags['generator'], 'WordPress') !== false) {
                     $class = "TagExtractor_WordPress";
-                } else {
-                    var_dump($metaTags['generator']);
                 }
             }
         }
