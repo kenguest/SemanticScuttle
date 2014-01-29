@@ -23,7 +23,7 @@
  * @link     http://sourceforge.net/projects/semanticscuttle
  */
 class SemanticScuttle_Service_TagExtractor_MediaWiki
-extends SemanticScuttle_Service_TagExtractor_MediaWiki
+extends SemanticScuttle_Service_TagExtractor_Basic
 {
     const MAX_WORDS = 2;
 
