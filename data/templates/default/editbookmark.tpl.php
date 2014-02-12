@@ -59,11 +59,11 @@ $ajaxUrl = ROOT . 'ajax/'
     </th>
     <td><textarea name="description" id="description" rows="5" cols="63" ><?php echo filter($row['bDescription'], 'xml'); ?></textarea></td>
     <td>← <?php echo T_('You can use anchors to delimite attributes. for example: [publisher]blah[/publisher] '); ?>
-    <?php if(count($GLOBALS['descriptionAnchors'])>0): ?>
+    <?php if (count($GLOBALS['descriptionAnchors'])>0): ?>
     <br /><br />
     <?php echo T_('Suggested anchors: '); ?>
 	<?php foreach($GLOBALS['descriptionAnchors'] as $anchorName => $anchorValue): ?>
-    <?php if(is_numeric($anchorName)) {
+    <?php if (is_numeric($anchorName)) {
     	$anchorName = $anchorValue;
     	$anchorValue = '['.$anchorValue.']'.'[/'.$anchorValue.']';
     } ?>
@@ -72,7 +72,7 @@ $ajaxUrl = ROOT . 'ajax/'
     <?php endif; ?>
     </td>
 </tr>
-<tr id="privateNoteZone" <?php if(strlen($row['bPrivateNote'])==0):?>style="display:none"<?php endif; ?>>
+<tr id="privateNoteZone" <?php if (strlen($row['bPrivateNote'])==0):?>style="display:none"<?php endif; ?>>
     <th align="left"><?php echo T_('Private Note'); ?></th>
     <td><textarea name="privateNote" id="privateNote" rows="1" cols="63" ><?php echo filter($row['bPrivateNote'], 'xml'); ?></textarea></td>
     <td>← <?php echo T_('Just visible by you and your contacts.'); ?>

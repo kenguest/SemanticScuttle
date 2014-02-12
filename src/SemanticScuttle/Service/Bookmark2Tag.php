@@ -135,7 +135,7 @@ class SemanticScuttle_Service_Bookmark2Tag extends SemanticScuttle_DbService
         $this->db->sql_transaction('begin');
 
         if ($replace) {
-            if (!$this->deleteTagsForBookmark($bookmarkid)){
+            if (!$this->deleteTagsForBookmark($bookmarkid)) {
                 $this->db->sql_transaction('rollback');
                 message_die(GENERAL_ERROR, 'Could not attach tags (deleting old ones failed)', '', __LINE__, __FILE__, $sql, $this->db);
                 return false;
@@ -379,6 +379,45 @@ class SemanticScuttle_Service_Bookmark2Tag extends SemanticScuttle_DbService
         return $output;
     }
 
+    /**
+     * Given an array of named tags, return an array containing them and the
+     * count of occurrences of them. Much the same as what getTags returns but
+     * a subset of it.
+     *
+     * @param array $tags
+     * @param null|id $userid
+     *
+     * @return array
+     */
+    function getChoiceTags($tags, $userid = NULL) {
+        $userservice =SemanticScuttle_Service_Factory::get('User');
+        $logged_on_user = $userservice->getCurrentUserId();
+        $imp = implode('\',\'', $tags);
+        $imp  = '\'' . $imp . '\'';
+
+        $query = 'SELECT T.tag, COUNT(B.bId) AS bCount FROM '. $GLOBALS['tableprefix'] .'bookmarks AS B INNER JOIN '. $userservice->getTableName() .' AS U ON B.uId = U.'. $userservice->getFieldName('primary') .' INNER JOIN '. $GLOBALS['tableprefix'] .'bookmarks2tags AS T ON B.bId = T.bId';
+
+        $conditions = array();
+        if (!is_null($userid)) {
+            $conditions['U.'. $userservice->getFieldName('primary')] = intval($userid);
+            if ($logged_on_user != $userid)
+            $conditions['B.bStatus'] = 0;
+        } else {
+            $conditions['B.bStatus'] = 0;
+        }
+
+        $query .= ' WHERE '. $this->db->sql_build_array('SELECT', $conditions) .' AND T.tag in ('. $imp .') GROUP BY T.tag ORDER BY bCount DESC, tag';
+
+        if (!($dbresult = $this->db->sql_query($query))) {
+            message_die(GENERAL_ERROR, 'Could not get tags', '', __LINE__, __FILE__, $query, $this->db);
+            return false;
+        }
+
+        $output = $this->db->sql_fetchrowset($dbresult);
+        $this->db->sql_freeresult($dbresult);
+        return $output;
+    }
+
 
     // Returns the tags related to the specified tags; i.e. attached to the same bookmarks
     function &getRelatedTags($tags, $for_user = NULL, $logged_on_user = NULL, $limit = 10) {
@@ -417,7 +456,7 @@ class SemanticScuttle_Service_Bookmark2Tag extends SemanticScuttle_DbService
         $query_5 = ' AND LEFT(T0.tag, 7) <> "system:" GROUP BY T0.tag ORDER BY bCount DESC, T0.tag';
         $query = $query_1 . $query_2 . $query_3 . $query_4 . $query_5;
 
-        if (! ($dbresult = $this->db->sql_query_limit($query, $limit)) ){
+        if (! ($dbresult = $this->db->sql_query_limit($query, $limit)) ) {
             message_die(GENERAL_ERROR, 'Could not get related tags', '', __LINE__, __FILE__, $query, $this->db);
             return false;
         }

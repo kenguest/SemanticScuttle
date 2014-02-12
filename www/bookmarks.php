@@ -44,6 +44,37 @@ function defineWithDefault($name, $array, $key, $default = '', $case = false)
     }
 }
 
+/**
+ * Filter tags based on whether they are already used by the current user.
+ *
+ * @param array   $tags       Array of tags
+ * @param boolean $includeAll Whether to exclude tags not present in db, or
+ * adjust resultset.
+ *
+ * @return array
+ */
+function filterTags($tags, $includeAll = false)
+{
+    $b2tservice = SemanticScuttle_Service_Factory::get('Bookmark2Tag');
+    $rTags = $b2tservice->getChoiceTags($tags);
+    /** proof of concept - later just return rTags for a tag cloud representation */
+    $ret = array();
+    $found = array();
+    foreach ($rTags as $rTag) {
+        $rTag['bCount']++;
+        $ret[] = $rTag;
+        $found[] = $rTag['tag'];
+    }
+
+    if ($includeAll) {
+        $not_found = array_diff($tags, $found);
+        foreach ($not_found as $element) {
+            $ret[] = array('bCount' => 0, 'tag' => $element);
+        }
+    }
+    return $ret;
+}
+
 /* Service creation: only useful services are created */
 $bookmarkservice = SemanticScuttle_Service_Factory::get('Bookmark');
 $cacheservice = SemanticScuttle_Service_Factory::get('Cache');
@@ -266,11 +297,13 @@ if ($templatename == 'editbookmark.tpl') {
                 }
             } else {
                 //copy from pop-up bookmarklet
-                $extractedTags = '';
+                $extractedTags = array();
                 if ($GLOBALS['tagExtraction']) {
                     $extractedTags = $tagextractorservice->extractFromUrl(
                         stripslashes(GET_ADDRESS)
                     );
+                    $filteredTags = filterTags($extractedTags, $bIncludeAll = true);
+                    $extractedTags = $filteredTags;
                 }
                 $tplVars['row'] = array(
                     'bTitle' => stripslashes(GET_TITLE),
@@ -279,8 +312,9 @@ if ($templatename == 'editbookmark.tpl') {
                     'bPrivateNote' => stripslashes(GET_PRIVATENOTE),
                     'tags' => (
                         GET_TAGS ?
-                        explode(',', stripslashes(GET_TAGS)) : $extractedTags
+                        explode(',', stripslashes(GET_TAGS)) : array()
                     ),
+                    'extractedTags' => $extractedTags,
                     'bStatus' => $GLOBALS['defaults']['privacy']
                 );
             }
@@ -395,7 +429,6 @@ if ($templatename == 'editbookmark.tpl') {
 
 $tplVars['summarizeLinkedTags'] = true;
 $tplVars['pageName'] = PAGE_BOOKMARKS;
-
 
 $templateservice->loadTemplate($templatename, $tplVars);
 

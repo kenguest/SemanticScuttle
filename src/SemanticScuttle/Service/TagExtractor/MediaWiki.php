@@ -30,7 +30,7 @@ extends SemanticScuttle_Service_TagExtractor_Basic
     /**
      * getTags
      *
-     * @return void
+     * @return array
      */
     public function getTags()
     {

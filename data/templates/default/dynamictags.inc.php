@@ -34,6 +34,8 @@ $allPopularTags        = $b2tservice->getPopularTags(null, 5, $logged_on_userid)
 $allPopularTagsCloud   = $b2tservice->tagCloud($allPopularTags, 5, 90, 175);
 $allPopularTagsCount   = count($allPopularTags);
 
+$suggestedTagsCloud    = $b2tservice->tagCloud($row['extractedTags'], 5, 90, 175);
+$suggestedTagsCount    = count($row['extractedTags']);
 
 // function printing the cloud
 function writeTagsProposition($tagsCloud, $title)
@@ -49,7 +51,7 @@ function writeTagsProposition($tagsCloud, $title)
 + '  <p class="popularTags tags"></p>'
 + '</div>');
 JS;
-	
+
 	$taglist = '';
 	foreach (array_keys($tagsCloud) as $key) {
 	    $row = $tagsCloud[$key];
@@ -101,6 +103,9 @@ function addonload(addition) {
 
 jQuery(function($) {
 <?php
+if ($suggestedTagsCount > 0) {
+	writeTagsProposition($suggestedTagsCloud, 'Suggested Tags');
+}
 if ($userPopularTagsCount > 0) {
 	writeTagsProposition($userPopularTagsCloud, T_('Popular Tags'));
 }
@@ -110,9 +115,9 @@ if ($allPopularTagsCount > 0) {
 ?>
         var taglist = $('#tags');
         var tags = taglist.val().split(', ');
-        
+
         var populartags = $('.edit-tagclouds span');
-        
+
         for (var i = 0; i < populartags.length; i++) {
             if (tags.contains(populartags[i].innerHTML)) {
                 populartags[i].className = 'selected';
@@ -124,20 +129,20 @@ function addTag(ele) {
     var thisTag = ele.innerHTML;
     var taglist = document.getElementById('tags');
     var tags = taglist.value.split(', ');
-    
+
     // If tag is already listed, remove it
     if (tags.contains(thisTag)) {
         tags = tags.remove(thisTag);
         ele.className = 'unselected';
-        
+
     // Otherwise add it
     } else {
         tags.splice(0, 0, thisTag);
         ele.className = 'selected';
     }
-    
+
     taglist.value = tags.join(', ');
-    
+
     document.getElementById('tags').focus();
 }
 //]]>
