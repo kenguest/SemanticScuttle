@@ -20,9 +20,9 @@ String.prototype.trim = function() {
 };
 
 var deleted = false;
-function deleteBookmark(ele, input){
+function deleteBookmark(ele, input) {
     var confirmDelete = "<span><?php echo T_('Are you sure?') ?> <a href=\"#\" onclick=\"deleteConfirmed(this, " + input + ", \'\'); return false;\"><?php echo T_('Yes'); ?></a> - <a href=\"#\" onclick=\"deleteCancelled(this); return false;\"><?php echo T_('No'); ?></a></span>";
-    ele.style.display = 'none';    
+    ele.style.display = 'none';
     ele.parentNode.innerHTML = ele.parentNode.innerHTML + confirmDelete;
 }
 
@@ -36,15 +36,15 @@ function deleteCancelled(ele) {
 function deleteConfirmed(ele, input, response) {
     //if (deleted == false) {
         deleted = ele.parentNode.parentNode.parentNode.parentNode;
-    //}    
+    //}
     var post = deleted;
-    post.className = 'xfolkentry deleted';    
+    post.className = 'xfolkentry deleted';
     if (response != '') {
         post.style.display = 'none';
         deleted = false;
     } else {
-        loadXMLDocProc('<?php echo ROOT; ?>ajaxDelete.php?id=' + input);        
-        post.style.display = 'none';        
+        loadXMLDocProc('<?php echo ROOT; ?>ajaxDelete.php?id=' + input);
+        post.style.display = 'none';
     }
 }
 
@@ -56,7 +56,7 @@ function previousElement(ele) {
     return ele;
 }
 
-function isAvailable(input, response){
+function isAvailable(input, response) {
     var usernameField = document.getElementById("username");
     var username = usernameField.value;
     username = username.toLowerCase();
@@ -98,7 +98,7 @@ function useAddress(ele) {
  *
  * @return boolean Returns false to halt execution after call
  */
-function getNewPrivateKey(input, response){
+function getNewPrivateKey(input, response) {
     var pk = document.getElementById('pPrivateKey');
     if (response != null) {
         pk.value = response.trim();
@@ -108,13 +108,31 @@ function getNewPrivateKey(input, response){
     return false;
 }
 
-function getTitle(input, response){
+function suggestTags() {
+    // Only prepend the div if there is not an h3 tag w Suggested Tags as the content.
+    var h3s = $('h3');
+    var suggest = 1;
+    for (var ih = 0; ih  < h3s.length; ih++) {
+        if (h3s[ih].innerHTML == 'Suggested Tags') {
+            suggest = 0;
+            ih = h3s.length;
+        }
+    }
+    if (suggest == 1) {
+        $('.edit-tagclouds').prepend('<div class="collapsible" id="edit-tagcloud-0">  <h3>Suggested Tags</h3><p class="popularTags tags"></p></div>');
+        // Get the tags.
+        // Add them.
+    }
+
+}
+function getTitle(input, response) {
     var title = document.getElementById('titleField');
     if (title.value == '') {
         title.style.backgroundImage = 'url(<?php echo $theme->resource('images/loading.gif');?>)';
         if (response != null) {
             title.style.backgroundImage = 'none';
             title.value = response;
+            suggestTags();
         } else if (input.indexOf('http') > -1) {
             loadXMLDocProc('<?php echo ROOT; ?>ajaxGetTitle.php?url=' + input);
         } else {
@@ -193,7 +211,7 @@ function playerLoad() {
 }
 
 function addAnchor(anchorForm, where) {
-    var whereZone = document.getElementById(where);    
-    whereZone.value = whereZone.value + anchorForm;    
+    var whereZone = document.getElementById(where);
+    whereZone.value = whereZone.value + anchorForm;
     document.getElementById(where).focus();
 }
