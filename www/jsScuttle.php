@@ -87,6 +87,7 @@ function useAddress(ele) {
         }
         getTitle(address, null);
         ele.value = address;
+        suggestTags(address);
     }
 }
 
@@ -108,23 +109,24 @@ function getNewPrivateKey(input, response) {
     return false;
 }
 
-function suggestTags() {
-    // Only prepend the div if there is not an h3 tag w Suggested Tags as the content.
+function suggestTags(url) {
+    // only prepend the div if there is not an h3 tag w Suggested Tags as the content.
     var h3s = $('h3');
     var suggest = 1;
+    var tags = null;
+
     for (var ih = 0; ih  < h3s.length; ih++) {
         if (h3s[ih].innerHTML == 'Suggested Tags') {
             suggest = 0;
             ih = h3s.length;
         }
     }
-    if (suggest == 1) {
-        $('.edit-tagclouds').prepend('<div class="collapsible" id="edit-tagcloud-0">  <h3>Suggested Tags</h3><p class="popularTags tags"></p></div>');
-        // Get the tags.
-        // Add them.
+    if (suggest == 0) {
+        return;
     }
-
+    $('.edit-tagclouds').prepend('<div class="collapsible" id="edit-tagcloud-0">  <h3>Suggested Tags</h3><p class="popularTags tags"></p></div>');
 }
+
 function getTitle(input, response) {
     var title = document.getElementById('titleField');
     if (title.value == '') {
@@ -132,7 +134,6 @@ function getTitle(input, response) {
         if (response != null) {
             title.style.backgroundImage = 'none';
             title.value = response;
-            suggestTags();
         } else if (input.indexOf('http') > -1) {
             loadXMLDocProc('<?php echo ROOT; ?>ajaxGetTitle.php?url=' + input);
         } else {
