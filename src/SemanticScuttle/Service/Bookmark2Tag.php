@@ -392,7 +392,13 @@ class SemanticScuttle_Service_Bookmark2Tag extends SemanticScuttle_DbService
     function getChoiceTags($tags, $userid = NULL) {
         $userservice =SemanticScuttle_Service_Factory::get('User');
         $logged_on_user = $userservice->getCurrentUserId();
-        $imp = implode('\',\'', $tags);
+
+        $ftags = array();
+        foreach($tags as $tag) {
+            $ftags[] = $this->db->sql_escape(trim($tag));
+        }
+
+        $imp = implode('\',\'', $ftags);
         $imp  = '\'' . $imp . '\'';
 
         $query = 'SELECT T.tag, COUNT(B.bId) AS bCount FROM '. $GLOBALS['tableprefix'] .'bookmarks AS B INNER JOIN '. $userservice->getTableName() .' AS U ON B.uId = U.'. $userservice->getFieldName('primary') .' INNER JOIN '. $GLOBALS['tableprefix'] .'bookmarks2tags AS T ON B.bId = T.bId';
